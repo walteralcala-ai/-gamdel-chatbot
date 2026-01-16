@@ -33,7 +33,7 @@ DATA_DIR.mkdir(exist_ok=True)
 DB_DIR = Path("db")
 DB_DIR.mkdir(exist_ok=True)
 
-app = FastAPI(title="GAMDEL RAG MVP - v5.1 (Gemini)")
+app = FastAPI(title="GAMDEL RAG MVP - v5.2 (Gemini)")
 
 app.add_middleware(
     CORSMiddleware,

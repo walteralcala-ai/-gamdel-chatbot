@@ -121,7 +121,7 @@ def load_documents_from_disk():
 @app.on_event("startup")
 async def startup_event():
     """Inicia el servidor"""
-    print("🚀 Iniciando GAMDEL Chatbot v5.1 (con Google Gemini)...")
+    print("🚀 Iniciando GAMDEL Chatbot v5.2 (con Google Gemini)...")
     print("✅ Servidor iniciado. Los documentos se cargarán bajo demanda.")
 
 # ============= BASE DE DATOS =============
@@ -336,7 +336,7 @@ HTML = """
         <h1 class="text-3xl font-bold text-white">GAMDEL</h1>
         <p class="text-slate-400 text-sm">Chat Inteligente con Documentos</p>
       </div>
-      <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">v5.1</span>
+      <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-xs font-semibold">v5.2</span>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">

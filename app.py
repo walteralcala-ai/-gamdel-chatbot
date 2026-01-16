@@ -370,12 +370,13 @@ HTML = """
       <div class="lg:col-span-2">
         <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col" style="height: 600px;">
           <h2 class="text-lg font-semibold mb-4">💬 Chat</h2>
-          <div id="messages" class="flex-1 overflow-y-auto mb-4 space-y-2 pr-2"></div>
           
-          <div class="flex gap-2">
+          <div class="flex gap-2 mb-4">
             <input id="q" type="text" placeholder="Pregunta sobre tus documentos... (Enter para enviar)" class="flex-1 border rounded-lg p-2"/>
             <button id="askBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700">Enviar</button>
           </div>
+          
+          <div id="messages" class="flex-1 overflow-y-auto space-y-2 pr-2"></div>
         </div>
       </div>
 

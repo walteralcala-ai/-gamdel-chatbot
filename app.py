@@ -121,13 +121,8 @@ def load_documents_from_disk():
 async def startup_event():
     """Inicia el servidor"""
     print("🚀 Iniciando GAMDEL Chatbot v5.1...")
-    try:
-        load_documents_from_disk()
-        print("✅ Documentos cargados exitosamente")
-    except Exception as e:
-        print(f"❌ Error en carga: {e}")
-        import traceback
-        traceback.print_exc()
+    print("✅ Servidor iniciado. Los documentos se cargarán bajo demanda.")
+
 
 # ============= BASE DE DATOS =============
 def init_db(tenant: str):

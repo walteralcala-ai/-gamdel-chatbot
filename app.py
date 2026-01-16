@@ -680,11 +680,15 @@ async def upload(tenant: str = Form(...), files: list[UploadFile] = File(None)):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 @app.post("/ask")
-async def ask(tenant: str = Form(...), question: str = Form(...)):
+async def ask(data: dict):
     try:
-        tenant = (tenant or "").strip()
+        tenant = (data.get("tenant") or "").strip()
+        question = (data.get("question") or "").strip()
+        
         if not tenant:
             return JSONResponse({"ok": False, "error": "tenant requerido"}, status_code=400)
+        if not question:
+            return JSONResponse({"ok": False, "error": "question requerido"}, status_code=400)
         
         if tenant not in DOCUMENTS_CACHE:
             load_documents_from_disk()

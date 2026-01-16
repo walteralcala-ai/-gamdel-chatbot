@@ -411,8 +411,8 @@ function addMsg(role, text) {
   div.appendChild(timeEl);
   div.appendChild(textEl);
   
-  messagesEl.insertBefore(div, messagesEl.firstChild);
-  messagesEl.scrollTop = 0;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
 async function loadDocuments() {

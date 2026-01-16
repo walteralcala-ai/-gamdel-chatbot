@@ -603,7 +603,7 @@ async def get_docs(tenant: str):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 @app.post("/upload")
-async def upload(tenant: str = Form(...), files: list[UploadFile] = File(...)):
+async def upload(tenant: str = Form(...), files: list = File(...)):
     try:
         tenant = (tenant or "").strip()
         if not tenant:
@@ -618,33 +618,44 @@ async def upload(tenant: str = Form(...), files: list[UploadFile] = File(...)):
         
         uploaded_files = []
         
-        for file in files:
-            if not file.filename:
-                continue
-                
-            out_path = tenant_dir / file.filename
-            file_content = await file.read()
-            
-            with open(out_path, 'wb') as f:
-                f.write(file_content)
-            
-            text_content, page_count = extract_text_from_pdf(str(out_path))
-            
-            if text_content.strip():
-                DOCUMENTS_CACHE[tenant][file.filename] = text_content
-                uploaded_files.append(file.filename)
-                
-                txt_path = tenant_dir / (out_path.stem + ".txt")
-                with open(txt_path, 'w', encoding='utf-8') as f:
-                    f.write(text_content)
-            
-            file_size = out_path.stat().st_size
-            save_document_metadata(tenant, file.filename, file_size, page_count)
+        # Asegurar que files es una lista
+        if not isinstance(files, list):
+            files = [files]
         
-        create_embeddings(tenant)
+        for file in files:
+            if not file or not file.filename:
+                continue
+            
+            try:
+                out_path = tenant_dir / file.filename
+                file_content = await file.read()
+                
+                with open(out_path, 'wb') as f:
+                    f.write(file_content)
+                
+                text_content, page_count = extract_text_from_pdf(str(out_path))
+                
+                if text_content.strip():
+                    DOCUMENTS_CACHE[tenant][file.filename] = text_content
+                    uploaded_files.append(file.filename)
+                    
+                    txt_path = tenant_dir / (out_path.stem + ".txt")
+                    with open(txt_path, 'w', encoding='utf-8') as f:
+                        f.write(text_content)
+                
+                file_size = out_path.stat().st_size
+                save_document_metadata(tenant, file.filename, file_size, page_count)
+            except Exception as file_err:
+                print(f"Error procesando {file.filename}: {file_err}")
+                continue
+        
+        if uploaded_files:
+            create_embeddings(tenant)
         
         return {"ok": True, "files": uploaded_files}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 @app.post("/ask")

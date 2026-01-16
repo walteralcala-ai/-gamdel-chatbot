@@ -737,7 +737,7 @@ async def get_docs(tenant: str):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 @app.post("/upload")
-async def upload(tenant: str = Form(...), files: list = File(...)):
+async def upload(tenant: str = Form(...), files: list[UploadFile] = File(...)):
     try:
         tenant = (tenant or "").strip()
         if not tenant:
@@ -751,9 +751,14 @@ async def upload(tenant: str = Form(...), files: list = File(...)):
             DOCUMENTS_CACHE[tenant] = {}
         
         for file in files:
+            if not file.filename:
+                continue
+                
             out_path = tenant_dir / file.filename
+            file_content = await file.read()
+            
             with open(out_path, 'wb') as f:
-                f.write(await file.read())
+                f.write(file_content)
             
             text_content, page_count = extract_text_from_pdf(str(out_path))
             

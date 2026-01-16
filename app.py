@@ -368,9 +368,9 @@ HTML = """
 
       <!-- Panel Central: Chat -->
       <div class="lg:col-span-2">
-        <div class="bg-white rounded-xl shadow-lg p-6 h-96 flex flex-col">
+        <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col" style="height: 600px;">
           <h2 class="text-lg font-semibold mb-4">💬 Chat</h2>
-          <div id="messages" class="flex-1 overflow-y-auto mb-4 space-y-3"></div>
+          <div id="messages" class="flex-1 overflow-y-auto mb-4 space-y-2 pr-2"></div>
           
           <div class="flex gap-2">
             <input id="q" type="text" placeholder="Pregunta sobre tus documentos... (Enter para enviar)" class="flex-1 border rounded-lg p-2"/>
@@ -395,11 +395,24 @@ const messagesEl = document.getElementById('messages');
 const docListEl = document.getElementById('docList');
 
 function addMsg(role, text) {
+  const now = new Date();
+  const time = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  
   const div = document.createElement('div');
-  div.className = role === 'user' ? 'bg-blue-100 p-2 rounded text-sm' : 'bg-gray-100 p-2 rounded text-sm';
-  div.innerHTML = text.replace(/\\n/g, '<br>');
-  messagesEl.appendChild(div);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  div.className = role === 'user' ? 'bg-blue-100 p-2 rounded text-xs mb-2' : 'bg-gray-100 p-2 rounded text-xs mb-2';
+  
+  const timeEl = document.createElement('small');
+  timeEl.className = 'text-gray-500 block text-xs mb-1';
+  timeEl.textContent = time;
+  
+  const textEl = document.createElement('div');
+  textEl.innerHTML = text.replace(/\\n/g, '<br>');
+  
+  div.appendChild(timeEl);
+  div.appendChild(textEl);
+  
+  messagesEl.insertBefore(div, messagesEl.firstChild);
+  messagesEl.scrollTop = 0;
 }
 
 async function loadDocuments() {

@@ -603,7 +603,7 @@ async def get_docs(tenant: str):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 @app.post("/upload")
-async def upload(tenant: str = Form(...), files: list = File(...)):
+async def upload(tenant: str = Form(...), files: list[UploadFile] = File(None)):
     try:
         tenant = (tenant or "").strip()
         if not tenant:
@@ -618,42 +618,62 @@ async def upload(tenant: str = Form(...), files: list = File(...)):
         
         uploaded_files = []
         
+        # Si no hay archivos, retornar error
+        if not files:
+            return JSONResponse({"ok": False, "error": "No files provided"}, status_code=400)
+        
         # Asegurar que files es una lista
         if not isinstance(files, list):
             files = [files]
         
         for file in files:
-            if not file or not file.filename:
+            # Validar que el archivo tenga nombre
+            if not file or not hasattr(file, 'filename') or not file.filename:
                 continue
             
             try:
-                out_path = tenant_dir / file.filename
+                # Leer el contenido del archivo
                 file_content = await file.read()
                 
+                # Guardar el archivo
+                out_path = tenant_dir / file.filename
                 with open(out_path, 'wb') as f:
                     f.write(file_content)
                 
+                # Extraer texto del PDF
                 text_content, page_count = extract_text_from_pdf(str(out_path))
                 
                 if text_content.strip():
+                    # Guardar en caché
                     DOCUMENTS_CACHE[tenant][file.filename] = text_content
                     uploaded_files.append(file.filename)
                     
+                    # Guardar archivo de texto
                     txt_path = tenant_dir / (out_path.stem + ".txt")
                     with open(txt_path, 'w', encoding='utf-8') as f:
                         f.write(text_content)
-                
-                file_size = out_path.stat().st_size
-                save_document_metadata(tenant, file.filename, file_size, page_count)
+                    
+                    # Guardar metadatos
+                    file_size = out_path.stat().st_size
+                    save_document_metadata(tenant, file.filename, file_size, page_count)
+                    
+                    print(f"✅ {file.filename} procesado exitosamente")
+                else:
+                    print(f"⚠️ {file.filename} no contiene texto")
+                    
             except Exception as file_err:
-                print(f"Error procesando {file.filename}: {file_err}")
+                print(f"❌ Error procesando {file.filename}: {file_err}")
+                import traceback
+                traceback.print_exc()
                 continue
         
+        # Crear embeddings si hay archivos
         if uploaded_files:
             create_embeddings(tenant)
         
         return {"ok": True, "files": uploaded_files}
     except Exception as e:
+        print(f"❌ Error en /upload: {e}")
         import traceback
         traceback.print_exc()
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
